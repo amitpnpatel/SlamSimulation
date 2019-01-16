@@ -1,0 +1,11 @@
+name: pySlam_dev
+channels:
+   - pkgw-forge
+   - conda-forge
+ dependencies:
+ - python=2.7
+- pip
+- numpy
+- pip:
+  - PyOpenGL
+  - PyOpenGL_accelerate
