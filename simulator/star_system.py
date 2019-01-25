@@ -162,13 +162,14 @@ def plotfunc():
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
     # Again, hooray for arrays!
-    for i in range(1,n+1):
-        glPushMatrix()
-        glTranslatef(rx[i],ry[i],rz[i])
+    # for i in range(1,n+1):
+    i = 1
+    glPushMatrix()
+    glTranslatef(20,20,20)
 
-        glColor3f(colr[i],colg[i],colb[i])
-        glutSolidSphere(rad[i],20,20)
-        glPopMatrix()
+    glColor3f(colr[i],colg[i],colb[i])
+    glutSolidSphere(rad[i],20,20)
+    glPopMatrix()
     glutSwapBuffers()
 
 def main():
