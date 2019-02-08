@@ -1,0 +1,12 @@
+version: '3'
+services:
+  ros:
+    build: ./ros
+    environment:
+      - GAZEBOIP=0.0.0.0
+      - DISPLAY=$DISPLAY
+      - QT_GRAPHICSSYTEM=native
+    ports:
+      - "11345:11345"
+    devices:
+      - /dev/dri:/dev/dri
