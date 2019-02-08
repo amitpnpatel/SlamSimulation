@@ -1,4 +1,4 @@
-FROM osrf/ros:kinetic-desktop-full-xenial
+FROM osrf/ros:melodic-desktop-full-bionic
 #RUN locale-gen en_US.UTF-8
 ENV LANG en_US.UTF-8
 RUN apt-get update && apt-get install -y \
@@ -7,12 +7,11 @@ RUN apt-get update && apt-get install -y \
     curl \
     wget \
     vim \
-    emacs24 \
     sudo \
     libgl1-mesa-glx \
     libgl1-mesa-dri \
     mesa-utils \
-    unzip \
+    unzip openssh-server xauth\
     && rm -rf /var/likb/apt/lists/*
 COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh

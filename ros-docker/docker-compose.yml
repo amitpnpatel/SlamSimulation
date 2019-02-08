@@ -4,9 +4,18 @@ services:
     build: ./ros
     environment:
       - GAZEBOIP=0.0.0.0
-      - DISPLAY=$DISPLAY
+      - GAZEBO_MASTER_URI=0.0.0.0:11345
+      - DISPLAY=localhost:10.0
       - QT_GRAPHICSSYTEM=native
     ports:
       - "11345:11345"
     devices:
       - /dev/dri:/dev/dri
+      #- /dev/video0:/dev/video0
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix
+      - /etc/group:/etc/group:ro
+      - /etc/passwd:/etc/passwd:ro
+      - /etc/shadow:/etc/shadow:ro
+      - /etc/sudoers.d:/etc/sudoers.d:ro
+      - /home/$USER/.Xauthority:/root/.Xauthority
