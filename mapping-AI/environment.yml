@@ -1,0 +1,6 @@
+name: snake-AI
+dependencies:
+  - python=3
+  - numpy
+  - pip:
+      - pygame
