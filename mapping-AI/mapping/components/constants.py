@@ -50,10 +50,11 @@ class Action:
         size_sensory_array = len(sensory_array)
         current_angle = directionAngle - ((size_sensory_array/2) * Directions.DELTA_THETA)
 
-        for radius in sensory_array:
-            if radius != math.inf:
+        for scan in sensory_array:
+            if scan != math.inf:
                 new_internal_map[xc + radius * math.cos(current_angle)][
                     yc + radius * math.sin(current_angle)] = 1
+                radius = scan
             else:
                 radius = maxr
 
