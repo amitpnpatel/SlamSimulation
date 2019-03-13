@@ -1,5 +1,7 @@
 import pytest
-from mapping.components.constants import Action, Directions
+from mapping.components.constants import Action, Directions, MAX_RANGE
+from tests.map2sensorArray import sensor_array
+import numpy as np
 
 def test_should_move():
     current = (0,0)
@@ -46,6 +48,21 @@ def test_should_turn_right():
     assert result[1] == Directions.NW
     result = Action.turn_right(None, current, Directions.NW, None)
     assert result[1] == Directions.NORTH
-    
+
 def test_should_update_map():
-    pass
+    current = (0,0)
+    direction = Directions.NE
+
+    # 20 x 20m grid
+    actual_map = 0 * np.ones((20 * Directions.METRE_2_PIX, 20 * Directions.METRE_2_PIX))
+    actual_map[15:20, 15:20] = 1
+    actual_map[20:25, 10:15] = 1
+
+    inner_map = -1 * np.ones((20 * Directions.METRE_2_PIX, 20 * Directions.METRE_2_PIX))
+    result = Action.update_map(sensor_array(current, direction, actual_map, 180), current, Directions.NW, inner_map)
+    np.save('/Users/divyesingh/Documents/SLAM/workspace/SlamSimulation/mapping-AI/actual.npy', actual_map)
+    np.save('/Users/divyesingh/Documents/SLAM/workspace/SlamSimulation/mapping-AI/sensed.npy', result[2])
+    # return(result, actual_map)
+
+    #import pdb; pdb.set_trace()
+
