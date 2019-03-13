@@ -1,6 +1,7 @@
-name: snake-AI
+name: mapping-AI
 dependencies:
   - python=3
   - numpy
   - pip:
       - pygame
+      - pytest

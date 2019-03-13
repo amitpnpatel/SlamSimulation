@@ -30,7 +30,7 @@ class Action:
     @staticmethod
     def turn_right(sensory_array, current, direction, internal_map):
         x, y = direction
-        new_x, new_y = (x + y, x - y)
+        new_x, new_y = (x + y, y - x)
 
         new_x = (new_x / abs(new_x)) if new_x != 0 else new_x
         new_y = (new_y / abs(new_y)) if new_y != 0 else new_y
