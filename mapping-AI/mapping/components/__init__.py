@@ -1,1 +1,3 @@
-from .constants import Directions, Action
+from .direction import Direction
+from .action import Action
+
