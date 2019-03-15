@@ -8,7 +8,7 @@ import time
 
 class SlamMap:
     def __init__(self, width, height):
-        self.__np_map = np.ones((width, height)) * -1
+        self.__np_map = np.ones((width * METRE_2_PIX, height * METRE_2_PIX)) * -1
 
     def set_map(self, pre_initialised_map):
         self.__np_map = pre_initialised_map    
@@ -19,9 +19,15 @@ class SlamMap:
     def __setitem__(self, key, value):
         self.__np_map[key] = value
 
+    def get_element_count(self, value):
+        return len(self.__np_map[self.__np_map == value])
+
+    def shape(self):
+        return self.__np_map.shape
+
     def get_map(self):
-        return np.flip(self.__np_map.transpose(), 0)
-        
+        return  np.flip(self.__np_map.transpose(), 0)
+    
     def __get_line_of_sight(self, line, starting_angle, current_position, size_sensory_array):
         current_angle = starting_angle + (line * DELTA_THETA)
         xc, yc = current_position
