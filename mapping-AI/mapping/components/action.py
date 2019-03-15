@@ -1,5 +1,7 @@
 import numpy as np
 import math
+from .constants import MAX_RANGE, DELTA_THETA
+from .direction import Direction
 
 class Action:
     @staticmethod
@@ -25,32 +27,13 @@ class Action:
         return current, (new_x, new_y), internal_map
 
     @staticmethod
-    def update_map(sensory_array, current, direction, internal_map):
+    def update_map(sensory_array, current, direction, slam_map):
         # update map with data
-        xc, yc = current
-        new_internal_map = internal_map
-        x, y = direction
-        directionAngle = np.rad2deg(math.atan2(y, x))
-        if np.sign(directionAngle) == -1:
-            directionAngle += 360
-
-        maxr = MAX_RANGE
-
+        direction_angle = Direction.get_direction_angle(direction)
+        
         size_sensory_array = len(sensory_array)
-        current_angle = directionAngle - ((size_sensory_array/2) * DELTA_THETA)
+        current_angle = direction_angle - ((size_sensory_array/2) * DELTA_THETA)
 
-        for scan in sensory_array:
-            if scan != math.inf:
-                radius = scan
-                new_internal_map[len2ind(xc, radius, cos, current_angle)][
-                    len2ind(yc, radius, sin, current_angle)] = 1
-            else:
-                radius = maxr
-
-            for i in np.arange(0, radius, DELTA_R):
-                new_internal_map[len2ind(xc, i, cos, current_angle)][
-                    len2ind(yc, i, sin, current_angle)] = 0
-
-            current_angle += DELTA_THETA
-
-        return current, direction, new_internal_map
+        slam_map.update_map(sensory_array, current, current_angle)
+        
+        return current, direction, slam_map

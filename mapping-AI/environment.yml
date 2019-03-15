@@ -1,6 +1,7 @@
 name: mapping-AI
 dependencies:
   - python=3
+  - opencv
   - numpy
   - pip:
       - pygame
