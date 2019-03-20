@@ -35,7 +35,7 @@ def test_should_return_the_count_of_elements_with_value():
 
 #     # 20 x 20m grid
 #     actual_map = np.zeros((20 * METRE_2_PIX, 20 * METRE_2_PIX))
-#     actual_map[45:55, 50:60] = 1
+#     actual_map[40:50, 50:60] = 1
 #     actual_map[450:600, 450:600] = 1
 
 #     slam_map = SlamMap(5, 5)

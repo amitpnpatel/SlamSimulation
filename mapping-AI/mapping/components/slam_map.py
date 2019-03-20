@@ -1,7 +1,7 @@
 import numpy as np
 import math
 import cv2
-from .constants import MAX_RANGE, len2ind, cos, sin, DELTA_R, DELTA_THETA, METRE_2_PIX
+from .constants import MAX_RANGE, len2ind, cos, sin, DELTA_R, DELTA_THETA, METRE_2_PIX, cart2pol
 from .action import Action
 from .direction import Direction
 import time
@@ -49,11 +49,25 @@ class SlamMap:
         direction_angle = Direction.get_direction_angle(direction)
         size_sensory_array = int(fov_angle//DELTA_THETA)
         current_angle = direction_angle - ((size_sensory_array/2) * DELTA_THETA)
+        angle_buckets = np.array([current_angle + i*DELTA_THETA for i in range(size_sensory_array)])
+        non_zero_coor = np.transpose(np.nonzero(self.__np_map))
+        xc, yc = current_position
+        
+        xx2 = cart2pol(non_zero_coor, [xc*METRE_2_PIX, yc*METRE_2_PIX])
+        xx2[:,1] = np.digitize(xx2[:,1], angle_buckets, right=True)
+        buckets = np.array([[idx, np.min(xx2[xx2[:,1] == idx][:,0])] for idx in np.unique(xx2[:,1])])
+        buckets = buckets[buckets[:,0] < size_sensory_array]
+        sensor_array = np.ones(angle_buckets.shape)*np.inf
+        sensor_array[np.int_(buckets[:,0])] = buckets[:,1]/METRE_2_PIX
+        sensor_array[sensor_array > MAX_RANGE] = np.inf
+        # line_of_sight_end_points = [(len2ind(xc, MAX_RANGE, cos, angle), len2ind(yc, MAX_RANGE, sin, angle)) for angle in np.arange(current_angle, size_sensory_array, DELTA_THETA)]
         
         
-        x =  [self.__get_line_of_sight(scan, current_angle, current_position, size_sensory_array) for scan in range(size_sensory_array)]
-        print(time.time() - seconds)
-        return x
+        # x =  [self.__get_line_of_sight(scan, current_angle, current_position, size_sensory_array) for scan in range(size_sensory_array)]
+        # print(time.time() - seconds)
+        a1 = np.pad(sensor_array, (1, 1), 'edge')
+        return np.median([a1[i+0:3+i] for i in range(sensor_array.shape[0])], axis=1)
+        #return sensor_array
 
     def update_map(self, sensory_array, current_position, current_angle):
         seconds = time.time()
@@ -82,4 +96,5 @@ class SlamMap:
         # update map with data
         for sensed_point in sensed_points:
                 self.__np_map[sensed_point] = 1
+        # self.__np_map = cv2.erode(self.__np_map, np.ones((5,5), np.uint8))
         print(time.time() - seconds)
