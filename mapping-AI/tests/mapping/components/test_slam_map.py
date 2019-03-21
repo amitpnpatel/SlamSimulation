@@ -1,7 +1,7 @@
 import pytest
 import numpy as np
 from mapping.components.slam_map import SlamMap
-from mapping.components.constants import METRE_2_PIX
+from mapping.components.constants import METRE_2_PIX, DELTA_R, DELTA_THETA, MAX_RANGE
 from mapping.components import Direction, Action
 
 def test_should_insert_value_as_map_coordinate():
@@ -29,42 +29,43 @@ def test_should_return_the_count_of_elements_with_value():
     assert slam_map.get_element_count(0) == 4
 
 
-# def test_should_return_sensory_array():
-#     current = (5,0)
-#     direction = Direction.NORTH
+def test_should_return_sensory_array():
 
-#     # 20 x 20m grid
-#     actual_map = np.zeros((20 * METRE_2_PIX, 20 * METRE_2_PIX))
-#     actual_map[40:50, 50:60] = 1
-#     actual_map[450:600, 450:600] = 1
+    current = (5,0)
+    direction = Direction.NORTH
+    r_t_fov = np.array([(r, t) for r in np.arange(0,MAX_RANGE,DELTA_R) for t in np.arange(0,180, DELTA_THETA)])
+    # 20 x 20m grid
+    actual_map = np.zeros((20 * METRE_2_PIX, 20 * METRE_2_PIX))
+    actual_map[40:50, 50:60] = 1
+    actual_map[450:550, 450:550] = 1
 
-#     slam_map = SlamMap(5, 5)
-#     slam_internal = SlamMap(20, 20)
-#     slam_map.set_map(actual_map)
-#     x = slam_map.sensor_array(current, direction, 180)
-#     result = Action.update_map(x, current, direction, slam_internal)
+    slam_map = SlamMap(5, 5)
+    slam_internal = SlamMap(20, 20)
+    slam_map.set_map(actual_map)
+    x = slam_map.sensor_array(current, direction, 180, r_t_fov)
+    result = Action.update_map(x, current, direction, slam_internal)
     
-#     current = (5, 10)
-#     direction = Direction.SOUTH
+    current = (5, 10)
+    direction = Direction.SOUTH
 
-#     x = slam_map.sensor_array(current, direction, 180)
-#     result = Action.update_map(x, current, direction, result[2])
+    x = slam_map.sensor_array(current, direction, 180, r_t_fov)
+    result = Action.update_map(x, current, direction, result[2])
 
-#     current = (0, 5)
-#     direction = Direction.EAST
+    current = (0, 5)
+    direction = Direction.EAST
 
-#     x = slam_map.sensor_array(current, direction, 180)
-#     result = Action.update_map(x, current, direction, result[2])
+    x = slam_map.sensor_array(current, direction, 180, r_t_fov)
+    result = Action.update_map(x, current, direction, result[2])
 
-#     current = (10, 5)
-#     direction = Direction.WEST
+    current = (10, 5)
+    direction = Direction.WEST
 
-#     x = slam_map.sensor_array(current, direction, 180)
-#     result = Action.update_map(x, current, direction, result[2])
+    x = slam_map.sensor_array(current, direction, 180, r_t_fov)
+    result = Action.update_map(x, current, direction, result[2])
 
     
-#     np.save('/Users/in-justin.jose/result.npy', result[2].get_map())
-#     np.save('/Users/in-justin.jose/actual.npy', slam_map.get_map())
+    np.save('/Users/in-justin.jose/result.npy', result[2].get_map())
+    np.save('/Users/in-justin.jose/actual.npy', slam_map.get_map())
 
     
 

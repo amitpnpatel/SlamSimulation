@@ -1,4 +1,5 @@
-from .constants import Directions
+from .constants import MAX_RANGE, DELTA_R, DELTA_THETA
+from .direction import Direction
 from .slam_map import SlamMap
 from .action import Action
 import numpy as np
@@ -19,6 +20,7 @@ class Bot:
         self.__model = model
         self.__sensor = sensor
         self.__fov = 180
+        self.__r_t_fov = np.array([(r, t) for r in np.arange(0,MAX_RANGE,DELTA_R) for t in np.arange(0,self.__fov, DELTA_THETA)])
 
     def do_action(self, sensory_array, action_key):
         self.__current, self.__direction, self.__internal_map = self.bot_action[action_key](

@@ -1,7 +1,7 @@
 import numpy as np
 import math
 import cv2
-from .constants import MAX_RANGE, len2ind, cos, sin, DELTA_R, DELTA_THETA, METRE_2_PIX, cart2pol
+from .constants import MAX_RANGE, len2ind, cos, sin, DELTA_R, DELTA_THETA, METRE_2_PIX, cart2pol, len2ind_np
 from .action import Action
 from .direction import Direction
 import time
@@ -9,6 +9,7 @@ import time
 class SlamMap:
     def __init__(self, width, height):
         self.__np_map = np.ones((width * METRE_2_PIX, height * METRE_2_PIX)) * -1
+        
 
     def set_map(self, pre_initialised_map):
         self.__np_map = pre_initialised_map    
@@ -42,41 +43,65 @@ class SlamMap:
 
         return np.inf
 
-    def sensor_array(self, current_position, direction, fov_angle):
+    def sensor_array(self, current_position, direction, fov_angle, r_t_fov):
+        
         seconds = time.time()
         #create sensory_array
-
         direction_angle = Direction.get_direction_angle(direction)
-        size_sensory_array = int(fov_angle//DELTA_THETA)
-        current_angle = direction_angle - ((size_sensory_array/2) * DELTA_THETA)
-        angle_buckets = np.array([current_angle + i*DELTA_THETA for i in range(size_sensory_array)])
+        size_sensory_array = int(fov_angle/DELTA_THETA)
+        current_angle =  direction_angle - (((size_sensory_array)/2) * DELTA_THETA)
+        angle_buckets = np.array([current_angle + i * DELTA_THETA for i in range(size_sensory_array)])
+        theta = np.copy(r_t_fov)
+        theta[:,1] = theta[:,1] + current_angle
+        xy_coord = np.empty(r_t_fov.shape)
+        xy_coord[:,0] = len2ind_np(current_position[0], theta[:,0], cos, theta[:,1])
+        xy_coord[:,1] = len2ind_np(current_position[1], theta[:,0], sin, theta[:,1])
         non_zero_coor = np.transpose(np.nonzero(self.__np_map))
-        xc, yc = current_position
+        xy1 = xy_coord[:,0] * 10000 +  xy_coord[:,1]
+        xy2 = non_zero_coor[:,0] * 10000 + non_zero_coor[:,1]
+        xy3 = theta[np.in1d(xy1, xy2)]
+        angles = np.unique(xy3[:,1])
         
-        xx2 = cart2pol(non_zero_coor, [xc*METRE_2_PIX, yc*METRE_2_PIX])
-        xx2[:,1] = np.digitize(xx2[:,1], angle_buckets, right=True)
-        buckets = np.array([[idx, np.min(xx2[xx2[:,1] == idx][:,0])] for idx in np.unique(xx2[:,1])])
-        buckets = buckets[buckets[:,0] < size_sensory_array]
         sensor_array = np.ones(angle_buckets.shape)*np.inf
-        sensor_array[np.int_(buckets[:,0])] = buckets[:,1]/METRE_2_PIX
+        for angle in angles:
+            sensor_array[angle_buckets == angle] = np.min(xy3[xy3[:,1] == angle])
         sensor_array[sensor_array > MAX_RANGE] = np.inf
+        print(time.time() - seconds)
+        # import pdb; pdb.set_trace()
+        return sensor_array
+        # direction_angle = Direction.get_direction_angle(direction)
+        # size_sensory_array = int(fov_angle//DELTA_THETA)
+        # current_angle = direction_angle - ((size_sensory_array/2) * DELTA_THETA)
+        # angle_buckets = np.array([current_angle + i * DELTA_THETA for i in range(size_sensory_array)])
+
+        # non_zero_coor = np.transpose(np.nonzero(self.__np_map))
+        # xc, yc = current_position
+        
+        # xx2 = cart2pol(non_zero_coor, [xc*METRE_2_PIX, yc*METRE_2_PIX])
+        # xx2[:,1] = np.digitize(xx2[:,1], angle_buckets, right=True)
+        # buckets = np.array([[idx, np.min(xx2[xx2[:,1] == idx][:,0])] for idx in np.unique(xx2[:,1])])
+        # buckets = buckets[buckets[:,0] < size_sensory_array]
+        # sensor_array = np.ones(angle_buckets.shape)*np.inf
+        # sensor_array[np.int_(buckets[:,0])] = buckets[:,1]/METRE_2_PIX
+        # sensor_array[sensor_array > MAX_RANGE] = np.inf
+        # import pdb; pdb.set_trace()        
         # line_of_sight_end_points = [(len2ind(xc, MAX_RANGE, cos, angle), len2ind(yc, MAX_RANGE, sin, angle)) for angle in np.arange(current_angle, size_sensory_array, DELTA_THETA)]
         
         
         # x =  [self.__get_line_of_sight(scan, current_angle, current_position, size_sensory_array) for scan in range(size_sensory_array)]
         # print(time.time() - seconds)
-        a1 = np.pad(sensor_array, (1, 1), 'edge')
-        return np.median([a1[i+0:3+i] for i in range(sensor_array.shape[0])], axis=1)
-        #return sensor_array
+        # a1 = np.pad(sensor_array, (10, 10), 'edge')
+        # return np.min([a1[i+0:11+i] for i in range(sensor_array.shape[0])], axis=1)
+        # return sensor_array
 
     def update_map(self, sensory_array, current_position, current_angle):
         seconds = time.time()
         xc, yc = current_position
         sensory_array_updated = [
-            (MAX_RANGE if scan == np.inf else scan, current_angle + i * DELTA_THETA, scan == np.inf)
+            (MAX_RANGE if scan == np.inf else scan, np.round(current_angle + i * DELTA_THETA, 3), scan == np.inf)
             for i, scan in enumerate(sensory_array)
         ]
-
+        
         # Flipping X, Y for opencv to do the manipulation on numpy array
         scan_lines = [
             (
@@ -88,7 +113,8 @@ class SlamMap:
         sensed_points = [
             (len2ind(xc, radius, cos, theta), len2ind(yc, radius, sin, theta))
             for radius, theta, is_inf in sensory_array_updated if not is_inf
-        ]        
+        ]
+        # import pdb; pdb.set_trace()
 
         for line in scan_lines:
             self.__np_map = cv2.line(self.__np_map, *line, 0, 1)
