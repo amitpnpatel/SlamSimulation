@@ -4,8 +4,9 @@ import math
 
 MAX_RANGE = 10
 METRE_2_PIX = 100
-DELTA_R = 0.009
-DELTA_THETA = 0.075
+MULTIPLIER = 2
+DELTA_R = 0.01*MULTIPLIER
+DELTA_THETA = 0.1*MULTIPLIER
 
 cos = lambda x: np.cos(np.deg2rad(x))
 sin = lambda x: np.sin(np.deg2rad(x))

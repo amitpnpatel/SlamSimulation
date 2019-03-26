@@ -8,7 +8,7 @@ def test_should_insert_value_as_map_coordinate():
     slam_map = SlamMap(1,1)
     slam_map[3,3] = 3
 
-    expected_map = np.ones((100,100))*-1
+    expected_map = np.ones((METRE_2_PIX,METRE_2_PIX))*-1
     expected_map[3,3] = 3
     assert np.all(slam_map.get_map() == np.flip(expected_map.transpose(), 0))
 
@@ -37,14 +37,14 @@ def test_should_return_sensory_array():
     # 20 x 20m grid
     actual_map = np.zeros((20 * METRE_2_PIX, 20 * METRE_2_PIX))
     actual_map[40:50, 50:60] = 1
-    actual_map[450:550, 450:550] = 1
+    actual_map[225:325, 225:325] = 1
 
     slam_map = SlamMap(5, 5)
     slam_internal = SlamMap(20, 20)
     slam_map.set_map(actual_map)
     x = slam_map.sensor_array(current, direction, 180, r_t_fov)
     result = Action.update_map(x, current, direction, slam_internal)
-    
+
     current = (5, 10)
     direction = Direction.SOUTH
 
@@ -63,9 +63,9 @@ def test_should_return_sensory_array():
     x = slam_map.sensor_array(current, direction, 180, r_t_fov)
     result = Action.update_map(x, current, direction, result[2])
 
-    
-    np.save('/Users/in-justin.jose/result.npy', result[2].get_map())
-    np.save('/Users/in-justin.jose/actual.npy', slam_map.get_map())
 
-    
+    np.save('/Users/divyesingh/result.npy', result[2].get_map())
+    np.save('/Users/divyesingh/actual.npy', slam_map.get_map())
+
+
 
